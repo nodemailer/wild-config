@@ -48,33 +48,37 @@ let loadConfig = skipEvent => {
 
         let stat = fs.statSync(filePath);
         if (!stat.isFile()) {
-            throw new Error('path is not a file');
+            throw new Error(filePath + ' is not a file');
         }
         let parsed;
+        try {
+            let contents = fs.readFileSync(filePath, 'utf-8');
 
-        let contents = fs.readFileSync(filePath, 'utf-8');
-
-        switch (ext) {
-            case '.js': {
-                let script = new vm.Script(contents);
-                const sandbox = {
-                    require,
-                    __dirname: basePath,
-                    __filename: filePath,
-                    module: {
-                        exports: {}
-                    }
-                };
-                script.runInNewContext(sandbox);
-                parsed = sandbox.module.exports;
-                break;
+            switch (ext) {
+                case '.js': {
+                    let script = new vm.Script(contents);
+                    const sandbox = {
+                        require,
+                        __dirname: basePath,
+                        __filename: filePath,
+                        module: {
+                            exports: {}
+                        }
+                    };
+                    script.runInNewContext(sandbox);
+                    parsed = sandbox.module.exports;
+                    break;
+                }
+                case '.toml':
+                    parsed = tomlParser(basePath, contents);
+                    break;
+                case '.json':
+                    parsed = JSON.parse(contents);
+                    break;
             }
-            case '.toml':
-                parsed = tomlParser(basePath, contents);
-                break;
-            case '.json':
-                parsed = JSON.parse(contents);
-                break;
+        } catch (E) {
+            E.message = filePath + ': ' + E.message;
+            throw E;
         }
         return parsed;
     }
@@ -128,7 +132,7 @@ let loadConfig = skipEvent => {
         } catch (E) {
             if (E.code !== 'ENOENT' || !ignoreMissing) {
                 // file missing, ignore
-                console.error(filePath + ': ' + E.message);
+                console.error('[' + filePath + '] ' + E.message);
                 process.exit(1);
             }
         }
