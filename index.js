@@ -59,6 +59,8 @@ let loadConfig = skipEvent => {
                 let script = new vm.Script(contents);
                 const sandbox = {
                     require,
+                    __dirname: basePath,
+                    __filename: filePath,
                     module: {
                         exports: {}
                     }
