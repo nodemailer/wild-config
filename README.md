@@ -2,7 +2,8 @@
 
 Opinionated configuration management module for Node.js daemon applications.
 
-* All config files use [toml](https://github.com/toml-lang/toml) syntax
+* Config files use either [toml](https://github.com/toml-lang/toml), JSON or JavaScript syntax
+* If the config file format is javascript, then the value must be exported with "module.exports = {...}"
 * The application can have a config file for default values in ./config/default.toml
 * Main config file path can be provided from a command line argument, eg. `--config=/etc/app.toml`
 * Additionally command line arguments can be used to override any existing config option
@@ -12,8 +13,8 @@ Opinionated configuration management module for Node.js daemon applications.
 
 *wild-config* tries to load configuration in the following order (missing files are skipped, except the one provided by `--config` argument). Values are merged.
 
-1. ./config/default.toml
-2. ./config/$NODE_ENV.toml
+1. ./config/default.*
+2. ./config/$NODE_ENV.*
 3. `--config` or `-c` argument value
 4. command line arguments
 

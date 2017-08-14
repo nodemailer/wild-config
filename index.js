@@ -1,4 +1,4 @@
-/* eslint no-console: 0 */
+/* eslint no-console: 0, global-require: 0 */
 'use strict';
 
 const EventEmitter = require('events');
@@ -7,12 +7,11 @@ const fs = require('fs');
 const toml = require('toml');
 const path = require('path');
 const deepExtend = require('deep-extend');
-const defaultPath = path.join(process.cwd(), 'config', 'default.toml');
-const envPath = path.join(process.cwd(), 'config', env + '.toml');
+const configDirectory = path.join(process.cwd(), 'config');
 const events = new EventEmitter();
 
 const argv = require('minimist')(process.argv.slice(2));
-const configPath = argv.config || argv.c;
+const configPath = argv.config || argv.c || false;
 
 module.exports = {};
 
@@ -25,11 +24,35 @@ let loadConfig = skipEvent => {
             return;
         }
         try {
+            let pathParts = path.parse(filePath);
+            let ext = pathParts.ext.toLowerCase();
             let stat = fs.statSync(filePath);
             if (!stat.isFile()) {
                 throw new Error('path is not a file');
             }
-            sources.push(toml.parse(fs.readFileSync(filePath, 'utf-8')));
+            let parsed;
+
+            if (ext === '.js') {
+                if (filePath.indexOf('/') !== '/') {
+                    filePath = path.join(process.cwd(), filePath);
+                }
+                parsed = require(filePath);
+            } else {
+                let contents = fs.readFileSync(filePath, 'utf-8');
+
+                switch (ext) {
+                    case '.toml':
+                        parsed = toml.parse(contents);
+                        break;
+                    case '.json':
+                        parsed = JSON.parse(contents);
+                        break;
+                }
+            }
+
+            if (parsed) {
+                sources.push(parsed);
+            }
         } catch (E) {
             if (E.code !== 'ENOENT' || !ignoreMissing) {
                 // file missing, ignore
@@ -39,10 +62,42 @@ let loadConfig = skipEvent => {
         }
     };
 
-    loadFromFile(defaultPath, true);
-    loadFromFile(envPath, true);
+    try {
+        let listing = fs.readdirSync(configDirectory);
+        listing
+            .map(file => ({
+                name: file,
+                isDefault: file.toLowerCase().indexOf('default.') === 0,
+                path: path.join(configDirectory, file)
+            }))
+            .filter(file => {
+                let parts = path.parse(file.name);
+                if (!['.toml', '.json', '.js'].includes(parts.ext.toLowerCase())) {
+                    return false;
+                }
+                if (!['default', env].includes(parts.name.toLowerCase())) {
+                    return false;
+                }
+                return true;
+            })
+            .sort((a, b) => {
+                if (a.isDefault) {
+                    return -1;
+                }
+                if (b.isDefault) {
+                    return 1;
+                }
+                return a.path.localeCompare(b.path);
+            })
+            .forEach(file => loadFromFile(file.path));
+    } catch (E) {
+        // failed to list files
+    }
+
+    // try user specified file
     loadFromFile(configPath);
 
+    // join found files
     let data = deepExtend(...sources);
 
     // apply command line options
