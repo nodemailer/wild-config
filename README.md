@@ -18,6 +18,8 @@ _wild-config_ tries to load configuration in the following order (missing files 
 3. `--config` or `-c` argument value
 4. command line arguments
 
+> If you want to use a different configuration directory than './config' for default configuration files, then set it with the `NODE_CONFIG_DIR` environment variable
+
 ### Command line arguments
 
 When using command line arguments to provide config values only such keys are merged that already exist in the configuration object, unknown keys are ignored. For subkeys use dot notation. Value type (numbers, booleans and strings are supported) is defined by existing value.

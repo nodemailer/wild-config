@@ -7,7 +7,7 @@ const fs = require('fs');
 const toml = require('toml');
 const path = require('path');
 const deepExtend = require('deep-extend');
-const configDirectory = path.join(process.cwd(), 'config');
+const configDirectory = process.env.NODE_CONFIG_DIR || path.join(process.cwd(), 'config');
 const events = new EventEmitter();
 const vm = require('vm');
 
