@@ -9,6 +9,7 @@ const path = require('path');
 const deepExtend = require('deep-extend');
 const configDirectory = path.join(process.cwd(), 'config');
 const events = new EventEmitter();
+const vm = require('vm');
 
 const argv = require('minimist')(process.argv.slice(2));
 const configPath = argv.config || argv.c || false;
@@ -18,38 +19,107 @@ module.exports = {};
 let loadConfig = skipEvent => {
     let sources = [{}];
 
+    function extendToml(basePath, contents) {
+        // # @include "/path/to/toml"
+        let c = 0;
+        return contents.replace(/^\s*#\s*@include\s*"([^"]+)"/gim, (m, p) => {
+            if (!path.isAbsolute(p)) {
+                p = path.join(basePath, p);
+            }
+            let res = m;
+            try {
+                let stat = fs.statSync(p);
+
+                if (!stat.isFile()) {
+                    throw new Error(p + ' is not a file');
+                }
+                res = '__include_file_path_' + ++c + '=' + JSON.stringify(p);
+            } catch (E) {
+                // ignore
+            }
+            return res;
+        });
+    }
+
+    function parseFile(filePath) {
+        let pathParts = path.parse(filePath);
+        let ext = pathParts.ext.toLowerCase();
+        let basePath = pathParts.dir;
+
+        let stat = fs.statSync(filePath);
+        if (!stat.isFile()) {
+            throw new Error('path is not a file');
+        }
+        let parsed;
+
+        let contents = fs.readFileSync(filePath, 'utf-8');
+
+        switch (ext) {
+            case '.js': {
+                let script = new vm.Script(contents);
+                const sandbox = {
+                    require,
+                    module: {
+                        exports: {}
+                    }
+                };
+                script.runInNewContext(sandbox);
+                parsed = sandbox.module.exports;
+                break;
+            }
+            case '.toml':
+                parsed = tomlParser(basePath, contents);
+                break;
+            case '.json':
+                parsed = JSON.parse(contents);
+                break;
+        }
+        return parsed;
+    }
+
+    function tomlParser(basePath, contents) {
+        let parsed = toml.parse(extendToml(basePath, contents));
+        // find includes
+        let walk = (node, parentNode, nodeKey, level) => {
+            if (level > 100) {
+                throw new Error('Too much nesting in configuration file');
+            }
+
+            if (Array.isArray(node)) {
+                node.forEach(entry => walk(entry, node, false, level + 1));
+            } else if (node && typeof node === 'object') {
+                Object.keys(node || {}).forEach(key => {
+                    if (/^__include_file_path_\d+$/.test(key) && typeof node[key] === 'string') {
+                        let parsed = parseFile(node[key]);
+                        delete node[key];
+                        if (Array.isArray(parsed)) {
+                            if (parentNode && nodeKey && Object.keys(node).length === 0) {
+                                parentNode[nodeKey] = parsed;
+                            }
+                        } else {
+                            Object.keys(parsed || {}).forEach(subKey => {
+                                node[subKey] = parsed[subKey];
+                            });
+                        }
+                    } else if (node[key] && typeof node[key] === 'object') {
+                        walk(node[key], node, key, level + 1);
+                    }
+                });
+            }
+        };
+
+        walk(parsed, false, false, 0);
+
+        return parsed;
+    }
+
     let loadFromFile = (filePath, ignoreMissing) => {
         if (!filePath) {
             // do nothing
             return;
         }
         try {
-            let pathParts = path.parse(filePath);
-            let ext = pathParts.ext.toLowerCase();
-            let stat = fs.statSync(filePath);
-            if (!stat.isFile()) {
-                throw new Error('path is not a file');
-            }
-            let parsed;
-
-            if (ext === '.js') {
-                if (filePath.indexOf('/') !== '/') {
-                    filePath = path.join(process.cwd(), filePath);
-                }
-                parsed = require(filePath);
-            } else {
-                let contents = fs.readFileSync(filePath, 'utf-8');
-
-                switch (ext) {
-                    case '.toml':
-                        parsed = toml.parse(contents);
-                        break;
-                    case '.json':
-                        parsed = JSON.parse(contents);
-                        break;
-                }
-            }
-
+            let parsed = parseFile(filePath);
             if (parsed) {
                 sources.push(parsed);
             }

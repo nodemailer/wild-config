@@ -3,3 +3,7 @@ value=2
 
 [test]
 value=1
+# @include "../extra/includes.toml"
+
+[arr]
+# @include "../extra/array.json"

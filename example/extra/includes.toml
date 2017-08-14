@@ -1,0 +1,6 @@
+tere=222
+okeido=444
+[sub]
+value=44
+[sub.arr]
+# @include "array.json"
