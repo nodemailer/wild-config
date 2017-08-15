@@ -58,6 +58,13 @@ This directive also works in a nested object
     # @include "/path/to/sub/config.toml"
 ```
 
+You can also use wildcards to load data from multiple files
+
+```toml
+# @include "/path/to/sub/*.toml"
+# @include "/path/to/sub/**/*.toml"
+```
+
 **Notes**
 
 - Included paths are resolved relative to the path of the configuration file where the include directive is used

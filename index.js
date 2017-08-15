@@ -4,6 +4,7 @@
 const EventEmitter = require('events');
 const env = (process.env.NODE_ENV || '').toString().toLowerCase().replace(/[^0-9a-z-_]/g, '') || 'development';
 const fs = require('fs');
+const glob = require('glob');
 const toml = require('toml');
 const path = require('path');
 const deepExtend = require('deep-extend');
@@ -28,14 +29,23 @@ let loadConfig = skipEvent => {
             }
             let res = m;
             try {
-                let stat = fs.statSync(p);
-
-                if (!stat.isFile()) {
-                    throw new Error(p + ' is not a file');
+                let files;
+                if (p.indexOf('*') >= 0) {
+                    files = glob.sync(p);
+                } else {
+                    files = [p];
                 }
-                res = '__include_file_path_' + ++c + '=' + JSON.stringify(p);
+
+                files.forEach(file => {
+                    let stat = fs.statSync(file);
+
+                    if (!stat.isFile()) {
+                        throw new Error(file + ' is not a file');
+                    }
+                });
+                res = '__include_file_path_' + ++c + '=' + JSON.stringify(files);
             } catch (E) {
-                // ignore
+                throw E;
             }
             return res;
         });
@@ -45,11 +55,6 @@ let loadConfig = skipEvent => {
         let pathParts = path.parse(filePath);
         let ext = pathParts.ext.toLowerCase();
         let basePath = pathParts.dir;
-
-        let stat = fs.statSync(filePath);
-        if (!stat.isFile()) {
-            throw new Error(filePath + ' is not a file');
-        }
         let parsed;
         try {
             let contents = fs.readFileSync(filePath, 'utf-8');
@@ -95,18 +100,21 @@ let loadConfig = skipEvent => {
                 node.forEach(entry => walk(entry, node, false, level + 1));
             } else if (node && typeof node === 'object') {
                 Object.keys(node || {}).forEach(key => {
-                    if (/^__include_file_path_\d+$/.test(key) && typeof node[key] === 'string') {
-                        let parsed = parseFile(node[key]);
+                    if (/^__include_file_path_\d+$/.test(key) && Array.isArray(node[key])) {
+                        let filePaths = node[key];
                         delete node[key];
-                        if (Array.isArray(parsed)) {
-                            if (parentNode && nodeKey && Object.keys(node).length === 0) {
-                                parentNode[nodeKey] = parsed;
+                        filePaths.forEach(filePath => {
+                            let parsed = parseFile(filePath);
+                            if (Array.isArray(parsed)) {
+                                if (parentNode && nodeKey && Object.keys(node).length === 0) {
+                                    parentNode[nodeKey] = parsed;
+                                }
+                            } else {
+                                Object.keys(parsed || {}).forEach(subKey => {
+                                    node[subKey] = parsed[subKey];
+                                });
                             }
-                        } else {
-                            Object.keys(parsed || {}).forEach(subKey => {
-                                node[subKey] = parsed[subKey];
-                            });
-                        }
+                        });
                     } else if (node[key] && typeof node[key] === 'object') {
                         walk(node[key], node, key, level + 1);
                     }
