@@ -27,6 +27,7 @@ let loadConfig = skipEvent => {
             if (!path.isAbsolute(p)) {
                 p = path.join(basePath, p);
             }
+            p = p.replace(/\{ENV\}/gi, env);
             let res = m;
             try {
                 let files;

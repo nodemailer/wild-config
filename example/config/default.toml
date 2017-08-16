@@ -7,3 +7,6 @@ value=1
 
 [arr]
 # @include "../extra/array.json"
+
+[devel]
+# @include "{env}-test.toml"
