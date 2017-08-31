@@ -1,8 +1,16 @@
 /* eslint no-console: 0, global-require: 0 */
 'use strict';
 
+if (process.env.DISABLE_WILD_CONFIG === 'true') {
+    return;
+}
+
 const EventEmitter = require('events');
-const env = (process.env.NODE_ENV || '').toString().toLowerCase().replace(/[^0-9a-z-_]/g, '') || 'development';
+const env =
+    (process.env.NODE_ENV || '')
+        .toString()
+        .toLowerCase()
+        .replace(/[^0-9a-z-_]/g, '') || 'development';
 const fs = require('fs');
 const glob = require('glob');
 const toml = require('toml');
@@ -192,7 +200,11 @@ let loadConfig = skipEvent => {
             return;
         }
         let value = argv[key];
-        let kPath = key.replace(/\.+/g, '.').replace(/^\.|\.$/g, '').trim().split('.');
+        let kPath = key
+            .replace(/\.+/g, '.')
+            .replace(/^\.|\.$/g, '')
+            .trim()
+            .split('.');
 
         let ignore = false;
         let parent = data;
