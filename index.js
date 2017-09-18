@@ -23,6 +23,8 @@ const vm = require('vm');
 const argv = require('minimist')(process.argv.slice(2));
 const configPath = argv.config || argv.c || false;
 
+events.setMaxListeners(0);
+
 module.exports = {};
 
 let loadConfig = skipEvent => {
@@ -193,18 +195,73 @@ let loadConfig = skipEvent => {
     // join found files
     let data = deepExtend(...sources);
 
+    delete argv._;
+    delete argv.config;
+    delete argv.c;
+
+    let walkConfig = (cParent, eParent) => {
+        Object.keys(eParent || {}).forEach(key => {
+            if (!(key in cParent)) {
+                return;
+            }
+
+            if (typeof cParent[key] === 'object') {
+                if (!cParent[key]) {
+                    // null
+                    return;
+                }
+                if (eParent[key] === 'object') {
+                    if (!eParent[key]) {
+                        // null
+                        return;
+                    }
+                    if (Array.isArray(cParent[key])) {
+                        if (Array.isArray(eParent[key])) {
+                            return;
+                        }
+                        // convert to array
+                        eParent[key] = eParent[key].trim().split(/\s*,\s*/);
+                        return;
+                    }
+                    return walkConfig(cParent[key], eParent[key]);
+                }
+            }
+
+            let value = eParent[key];
+
+            if (typeof eParent[key] === 'number') {
+                cParent[key] = Number(cParent[key]);
+            } else if (typeof eParent[key] === 'boolean') {
+                if (!isNaN(value)) {
+                    value = Number(value);
+                } else {
+                    value = value.toLowerCase();
+                }
+                let falsy = ['false', 'null', 'undefined', 'no', '0', '', 0];
+                cParent[key] = falsy.includes(value) ? false : !!value;
+            } else {
+                cParent[key] = eParent[key];
+            }
+        });
+    };
+    walkConfig(data, argv);
+
     // apply command line options
     // only modifies keys that already exist
     Object.keys(argv).forEach(key => {
         if (key === '_' || key === 'config' || key === 'c') {
             return;
         }
+
         let value = argv[key];
+
         let kPath = key
             .replace(/\.+/g, '.')
             .replace(/^\.|\.$/g, '')
             .trim()
             .split('.');
+
+        console.log(kPath);
 
         let ignore = false;
         let parent = data;
@@ -215,11 +272,17 @@ let loadConfig = skipEvent => {
             }
             if (parent[k] && typeof parent[k] === 'object' && !Array.isArray(parent[k])) {
                 parent = parent[k];
+            } else {
+                ignore = true;
             }
         });
         if (ignore) {
             return;
         }
+
+        console.log(parent);
+        console.log(eKey);
+        console.log(typeof parent[eKey]);
         if (eKey in parent) {
             if (typeof parent[eKey] === 'number' && !isNaN(value)) {
                 parent[eKey] = Number(value);

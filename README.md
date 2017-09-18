@@ -22,7 +22,7 @@ _wild-config_ tries to load configuration in the following order (missing files 
 
 ### Command line arguments
 
-When using command line arguments to provide config values only such keys are merged that already exist in the configuration object, unknown keys are ignored. For subkeys use dot notation. Value type (numbers, booleans and strings are supported) is defined by existing value.
+When using command line arguments to provide config values only such keys are merged that already exist in the configuration object. For subkeys use dot notation. Value type (numbers, booleans and strings are supported) is defined by existing value.
 
 Example _config/default.toml_:
 
