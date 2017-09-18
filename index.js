@@ -229,21 +229,20 @@ let loadConfig = skipEvent => {
 
             let value = eParent[key];
 
-            if (typeof eParent[key] === 'number') {
-                cParent[key] = Number(cParent[key]);
-            } else if (typeof eParent[key] === 'boolean') {
+            if (typeof cParent[key] === 'number') {
+                eParent[key] = Number(eParent[key]);
+            } else if (typeof cParent[key] === 'boolean') {
                 if (!isNaN(value)) {
                     value = Number(value);
                 } else {
                     value = value.toLowerCase();
                 }
                 let falsy = ['false', 'null', 'undefined', 'no', '0', '', 0];
-                cParent[key] = falsy.includes(value) ? false : !!value;
-            } else {
-                cParent[key] = eParent[key];
+                eParent[key] = falsy.includes(value) ? false : !!value;
             }
         });
     };
+
     if (Object.keys(argv || {}).length) {
         walkConfig(data, argv);
         data = deepExtend(data, argv);
