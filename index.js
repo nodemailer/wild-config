@@ -244,61 +244,10 @@ let loadConfig = skipEvent => {
             }
         });
     };
-    walkConfig(data, argv);
-
-    // apply command line options
-    // only modifies keys that already exist
-    Object.keys(argv).forEach(key => {
-        if (key === '_' || key === 'config' || key === 'c') {
-            return;
-        }
-
-        let value = argv[key];
-
-        let kPath = key
-            .replace(/\.+/g, '.')
-            .replace(/^\.|\.$/g, '')
-            .trim()
-            .split('.');
-
-        console.log(kPath);
-
-        let ignore = false;
-        let parent = data;
-        let eKey = kPath.pop();
-        kPath.forEach(k => {
-            if (ignore) {
-                return;
-            }
-            if (parent[k] && typeof parent[k] === 'object' && !Array.isArray(parent[k])) {
-                parent = parent[k];
-            } else {
-                ignore = true;
-            }
-        });
-        if (ignore) {
-            return;
-        }
-
-        console.log(parent);
-        console.log(eKey);
-        console.log(typeof parent[eKey]);
-        if (eKey in parent) {
-            if (typeof parent[eKey] === 'number' && !isNaN(value)) {
-                parent[eKey] = Number(value);
-            } else if (typeof parent[eKey] === 'boolean') {
-                if (!isNaN(value)) {
-                    value = Number(value);
-                } else {
-                    value = value.toLowerCase();
-                }
-                let falsy = ['false', 'null', 'undefined', 'no', '0', '', 0];
-                parent[eKey] = falsy.includes(value) ? false : !!value;
-            } else {
-                parent[eKey] = value;
-            }
-        }
-    });
+    if (Object.keys(argv || {}).length) {
+        walkConfig(data, argv);
+        data = deepExtend(data, argv);
+    }
 
     Object.keys(data).forEach(key => {
         if (key !== 'on') {
