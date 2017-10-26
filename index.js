@@ -25,7 +25,9 @@ const configPath = argv.config || argv.c || false;
 
 events.setMaxListeners(0);
 
-module.exports = {};
+module.exports = {
+    configDirectory
+};
 
 let loadConfig = skipEvent => {
     let sources = [{}];
