@@ -2,20 +2,20 @@
 
 Opinionated configuration management module for Node.js daemon applications.
 
-- Config files use either [toml](https://github.com/toml-lang/toml), JSON or JavaScript syntax
-- If the config file format is JavaScript, then the value must be exported with "module.exports = {...}"
-- The application can have a config file for default values in ./config/default.toml
-- Main config file path can be provided from a command line argument, eg. `--config=/etc/app.toml`
-- Additionally command line arguments can be used to override any existing config option
-- _wild-config_ detects SIGHUP and reloads configuration files automatically
+-   Config files use either [toml](https://github.com/toml-lang/toml), JSON or JavaScript syntax
+-   If the config file format is JavaScript, then the value must be exported with "module.exports = {...}"
+-   The application can have a config file for default values in ./config/default.toml
+-   Main config file path can be provided from a command line argument, eg. `--config=/etc/app.toml`
+-   Additionally command line arguments can be used to override any existing config option
+-   _wild-config_ detects SIGHUP and reloads configuration files automatically
 
 ## Loading order
 
 _wild-config_ tries to load configuration in the following order (missing files are skipped, except the one provided by `--config` argument). Values are merged.
 
-1. ./config/default.*
-2. ./config/$NODE_ENV.*
-3. `--config` or `-c` argument value
+1. ./config/default.\*
+2. ./config/\$NODE_ENV.\*
+3. `NODE_CONFIG_PATH` environment value or `--config` argument value
 4. command line arguments
 
 > If you want to use a different configuration directory than './config' for default configuration files, then set it with the `NODE_CONFIG_DIR` environment variable
@@ -67,11 +67,11 @@ You can also use wildcards to load data from multiple files
 
 **Notes**
 
-- Included paths are resolved relative to the path of the configuration file where the include directive is used
-- Included config files do not have to be toml files, any other supported format works as well
-- If the included config file is a toml file then it can have its own includes
-- If the config file returns an array then the array value will become the value of the parent key of the directive only if there are no other subkeys at the same level as the directive
-- Special value `{ENV}` is replaced in all file paths by the NODE_ENV value
+-   Included paths are resolved relative to the path of the configuration file where the include directive is used
+-   Included config files do not have to be toml files, any other supported format works as well
+-   If the included config file is a toml file then it can have its own includes
+-   If the config file returns an array then the array value will become the value of the parent key of the directive only if there are no other subkeys at the same level as the directive
+-   Special value `{ENV}` is replaced in all file paths by the NODE_ENV value
 
 ## Application config file
 
@@ -96,19 +96,19 @@ _wild-config_ catches SIGHUP signal and reloads configuration files. Additionall
 
 ```javascript
 const config = require('wild-config');
-config.on('reload', ()=>{
+config.on('reload', () => {
     console.log('New "server.enabled" value: %s', config.server.enabled);
 });
 ```
 
 ### Events
 
-- _'reload'_ emitted when SIGHUP is received and configuration is reloaded
+-   _'reload'_ emitted when SIGHUP is received and configuration is reloaded
 
 ### Limitations
 
-- You can not use "on" as a root key. If you do then it is ignored. This key is reserved for the event emitter handler.
-- When providing configuration options from command line then `--config` does not override `root.config` value (if it even exists). This argument is used only for defining the configuration file path.
+-   You can not use "on" as a root key. If you do then it is ignored. This key is reserved for the event emitter handler.
+-   When providing configuration options from command line then `--config` does not override `root.config` value (if it even exists). This argument is used only for defining the configuration file path.
 
 ## Licese
 

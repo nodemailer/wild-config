@@ -21,7 +21,7 @@ const events = new EventEmitter();
 const vm = require('vm');
 
 const argv = require('minimist')(process.argv.slice(2));
-const configPath = argv.config || argv.c || false;
+const configPath = process.env.NODE_CONFIG_PATH || argv.config || false;
 
 events.setMaxListeners(0);
 
@@ -199,7 +199,6 @@ let loadConfig = skipEvent => {
 
     delete argv._;
     delete argv.config;
-    delete argv.c;
 
     let walkConfig = (cParent, eParent) => {
         Object.keys(eParent || {}).forEach(key => {
