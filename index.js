@@ -81,6 +81,9 @@ let loadConfig = skipEvent => {
                         __filename: filePath,
                         module: {
                             exports: {}
+                        },
+                        process: {
+                          env: process.env
                         }
                     };
                     script.runInNewContext(sandbox);
