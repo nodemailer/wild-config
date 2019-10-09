@@ -83,6 +83,7 @@ let loadConfig = skipEvent => {
                             exports: {}
                         },
                         process: {
+                          cwd: process.cwd,
                           env: process.env
                         }
                     };
