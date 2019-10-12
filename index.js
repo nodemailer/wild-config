@@ -82,10 +82,7 @@ let loadConfig = skipEvent => {
                         module: {
                             exports: {}
                         },
-                        process: {
-                          cwd: process.cwd,
-                          env: process.env
-                        }
+                        process
                     };
                     script.runInNewContext(sandbox);
                     parsed = sandbox.module.exports;
