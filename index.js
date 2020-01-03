@@ -41,25 +41,23 @@ let loadConfig = skipEvent => {
             }
             p = p.replace(/\{ENV\}/gi, env);
             let res = m;
-            try {
-                let files;
-                if (p.indexOf('*') >= 0) {
-                    files = glob.sync(p);
-                } else {
-                    files = [p];
-                }
 
-                files.forEach(file => {
-                    let stat = fs.statSync(file);
-
-                    if (!stat.isFile()) {
-                        throw new Error(file + ' is not a file');
-                    }
-                });
-                res = '__include_file_path_' + ++c + '=' + JSON.stringify(files);
-            } catch (E) {
-                throw E;
+            let files;
+            if (p.indexOf('*') >= 0) {
+                files = glob.sync(p);
+            } else {
+                files = [p];
             }
+
+            files.forEach(file => {
+                let stat = fs.statSync(file);
+
+                if (!stat.isFile()) {
+                    throw new Error(file + ' is not a file');
+                }
+            });
+            res = '__include_file_path_' + ++c + '=' + JSON.stringify(files);
+
             return res;
         });
     }
