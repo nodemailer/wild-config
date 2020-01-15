@@ -110,6 +110,6 @@ config.on('reload', () => {
 -   You can not use "on" as a root key. If you do then it is ignored. This key is reserved for the event emitter handler.
 -   When providing configuration options from command line then `--config` does not override `root.config` value (if it even exists). This argument is used only for defining the configuration file path.
 
-## Licese
+## License
 
 **MIT**
