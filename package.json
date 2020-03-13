@@ -22,7 +22,7 @@
     "dependencies": {
         "deep-extend": "0.6.0",
         "glob": "7.1.6",
-        "minimist": "1.2.0",
+        "minimist": "1.2.5",
         "toml": "3.0.0"
     },
     "devDependencies": {
