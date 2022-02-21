@@ -1,6 +1,6 @@
 {
     "name": "wild-config",
-    "version": "1.5.1",
+    "version": "1.6.0",
     "description": "Configuration management module",
     "main": "index.js",
     "scripts": {
@@ -8,7 +8,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/wildduck-email/wild-config.git"
+        "url": "git+https://github.com/nodemailer/wild-config.git"
     },
     "keywords": [
         "config"
@@ -16,20 +16,20 @@
     "author": "Andris Reinman",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/wildduck-email/wild-config/issues"
+        "url": "https://github.com/nodemailer/wild-config/issues"
     },
-    "homepage": "https://github.com/wildduck-email/wild-config#readme",
+    "homepage": "https://github.com/nodemailer/wild-config#readme",
     "dependencies": {
         "deep-extend": "0.6.0",
-        "glob": "7.1.6",
+        "glob": "7.2.0",
         "minimist": "1.2.5",
         "toml": "3.0.0"
     },
     "devDependencies": {
         "eslint-config-nodemailer": "1.2.0",
-        "eslint-config-prettier": "6.11.0",
-        "grunt": "1.1.0",
-        "grunt-cli": "1.3.2",
-        "grunt-eslint": "22.0.0"
+        "eslint-config-prettier": "8.4.0",
+        "grunt": "1.4.1",
+        "grunt-cli": "1.4.3",
+        "grunt-eslint": "24.0.0"
     }
 }

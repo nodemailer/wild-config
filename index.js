@@ -11,6 +11,7 @@ const env =
         .toString()
         .toLowerCase()
         .replace(/[^0-9a-z-_]/g, '') || 'development';
+
 const fs = require('fs');
 const glob = require('glob');
 const toml = require('toml');
@@ -20,7 +21,20 @@ const configDirectory = process.env.NODE_CONFIG_DIR || path.join(process.cwd(), 
 const events = new EventEmitter();
 const vm = require('vm');
 
-const argv = require('minimist')(process.argv.slice(2));
+const argList = process.argv.slice(2);
+
+// Populate environment variables into cli arguments
+// appconf_key_name=123 becomes --key.name=123
+Object.keys(process.env).forEach(key => {
+    if (/^appconf_/i.test(key)) {
+        let cKey = key.substr('appconf_'.length).replace(/_/g, '.');
+        if (!argList.some(e => e.indexOf(`--${cKey}=`) >= 0)) {
+            argList.push(`--${cKey}=${process.env[key]}`);
+        }
+    }
+});
+
+const argv = require('minimist')(argList);
 const configPath = process.env.NODE_CONFIG_PATH || argv.config || false;
 
 events.setMaxListeners(0);
