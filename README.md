@@ -23,7 +23,7 @@ _wild-config_ tries to load configuration in the following order (missing files 
 
 ### Environment variables
 
-When using environment variables to provide config values, only such keys are merged that already exist in the configuration object, so you have to define a default value in the config file. Use underscores instead of dots for subkeys.
+When using environment variables to provide config values, only such keys are merged that already exist in the configuration object, so you have to define a default value in the config file. Use underscores instead of dots for subkeys. Note that all underscores are interpreted as dots when parsing, which means keys with underscores can't be overriden with environment variables.
 
 Example _config/default.toml_:
 
