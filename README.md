@@ -99,6 +99,7 @@ You can also use wildcards to load data from multiple files.
 -   Included config files do not have to be toml files. Any other supported format works as well
 -   If the included config file is a toml file, then it can have its own includes
 -   If the config file returns an array, then the array value will become the value of the parent key of the directive only if there are no other subkeys at the same level as the directive
+-   In case of duplicate keys, included file will always override the values regardless if `@include` is placed before or after the declaration
 -   Special value `{ENV}` is replaced in all file paths by the NODE_ENV value
 
 ## Application config file
