@@ -223,7 +223,7 @@ let loadConfig = skipEvent => {
                     // null
                     return;
                 }
-                if (eParent[key] === 'object') {
+                if (typeof eParent[key] === 'object') {
                     if (!eParent[key]) {
                         // null
                         return;
