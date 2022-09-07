@@ -1,6 +1,6 @@
 {
     "name": "wild-config",
-    "version": "1.6.1",
+    "version": "1.7.0",
     "description": "Configuration management module",
     "main": "index.js",
     "scripts": {
