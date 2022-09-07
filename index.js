@@ -228,15 +228,11 @@ let loadConfig = skipEvent => {
                         // null
                         return;
                     }
-                    if (Array.isArray(cParent[key])) {
-                        if (Array.isArray(eParent[key])) {
-                            return;
-                        }
-                        // convert to array
-                        eParent[key] = eParent[key].trim().split(/\s*,\s*/);
-                        return;
-                    }
                     return walkConfig(cParent[key], eParent[key]);
+                }
+                if (typeof eParent[key] === 'string' && Array.isArray(cParent[key])) {
+                    eParent[key] = eParent[key].trim().split(/\s*,\s*/);
+                    return;
                 }
             }
 
