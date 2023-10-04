@@ -7,7 +7,6 @@ Opinionated configuration management module for Node.js daemon applications.
 -   The application can have a config file for default values in ./config/default.toml
 -   Main config file path can be provided from a command-line argument, e.g. `--config=/etc/app.toml`
 -   Additionally, command-line arguments can be used to override any existing config option
--   _wild-config_ detects SIGHUP and reloads configuration files automatically
 
 ## Loading order
 
@@ -118,21 +117,6 @@ ExecStart=/usr/bin/node index.js --config=/etc/app.toml
 const config = require('wild-config');
 console.log(config.server.enabled);
 ```
-
-### Configuration reload
-
-_wild-config_ catches SIGHUP signal and reloads configuration files. Additionally, a 'reload' event is emitted.
-
-```javascript
-const config = require('wild-config');
-config.on('reload', () => {
-    console.log('New "server.enabled" value: %s', config.server.enabled);
-});
-```
-
-### Events
-
--   _'reload'_ emitted when SIGHUP is received, and configuration is reloaded
 
 ### Limitations
 

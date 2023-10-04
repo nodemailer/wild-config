@@ -276,8 +276,4 @@ Object.defineProperty(module.exports, 'on', {
     value: (...args) => events.on(...args)
 });
 
-process.on('SIGHUP', () => {
-    setImmediate(loadConfig);
-});
-
 loadConfig(true);
