@@ -93,7 +93,8 @@ let loadConfig = skipEvent => {
                         __filename: filePath,
                         module: {
                             exports: {}
-                        }
+                        },
+                        process
                     };
                     script.runInNewContext(sandbox);
                     parsed = sandbox.module.exports;
